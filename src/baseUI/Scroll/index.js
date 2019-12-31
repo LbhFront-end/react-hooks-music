@@ -1,7 +1,10 @@
-import React, { forwardRef, useState, useEffect, useRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useState, useEffect, useRef, useImperativeHandle, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import BScroll from 'better-scroll';
-import { ScrollContainer } from './style';
+import Loading from '../Loading';
+import LoadingV2 from '../LoadingV2';
+import { ScrollContainer, PullUpLoading, PullDownLoading } from './style';
+import { debounce } from '../../api/utils';
 
 const Scroll = forwardRef((props, ref) => {
   const [bScroll, setBScroll] = useState();
@@ -14,8 +17,21 @@ const Scroll = forwardRef((props, ref) => {
     pullDown,
     bounceTop,
     bounceBottom,
-    onScroll
+    onScroll,
+    pullUpLoading,
+    pullDownLoading
   } = props;
+  const PullUpdisplayStyle = pullUpLoading ? { display: "" } : { display: "none" };
+  const PullDowndisplayStyle = pullDownLoading ? { display: "" } : { display: "none" };
+
+  let pullUpDebounce = useMemo(() => {
+    return debounce(pullUp, 300)
+  }, [pullUp])
+
+  let pullDownDebounce = useMemo(() => {
+    return debounce(pullDown, 300)
+  }, [pullDown]);
+
   useEffect(() => {
     const scroll = new BScroll(scrollContaninerRef.current, {
       scrollX: direction === "horizental",
@@ -51,13 +67,13 @@ const Scroll = forwardRef((props, ref) => {
     bScroll.on('scrollEnd', () => {
       // 判断是否滑动到了底部
       if (bScroll.y <= bScroll.maxScrollY + 100) {
-        pullUp();
+        pullUpDebounce();
       }
     })
     return () => {
       bScroll.off('scrollEnd')
     }
-  }, [pullUp, bScroll])
+  }, [pullUp, pullUpDebounce, bScroll])
 
   // 进行下拉的判断，调用下拉刷新的函数
   useEffect(() => {
@@ -65,13 +81,13 @@ const Scroll = forwardRef((props, ref) => {
     bScroll.on('touchEnd', (pos) => {
       // 判断用户下拉动作
       if (pos.y > 50) {
-        pullDown()
+        pullDownDebounce()
       }
     })
     return () => {
       bScroll.off('touchEnd')
     }
-  }, [pullDown, bScroll])
+  }, [pullDown, pullDownDebounce, bScroll])
 
   // 每次渲染都要刷新实例，防止无法滑动
   useEffect(() => {
@@ -97,6 +113,8 @@ const Scroll = forwardRef((props, ref) => {
   return (
     <ScrollContainer ref={scrollContaninerRef}>
       {props.children}
+      <PullUpLoading style={PullUpdisplayStyle}><Loading /></PullUpLoading>
+      <PullDownLoading style={PullDowndisplayStyle}><LoadingV2 /></PullDownLoading>
     </ScrollContainer>
   )
 })
