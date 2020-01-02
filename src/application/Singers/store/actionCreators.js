@@ -1,6 +1,5 @@
-import { CHANGE_SINGER_LIST, CHANGE_PAGE_COUNT, CHANGE_PULLDOWN_LOADING, CHANGE_PULLUP_LOADING } from './constants';
+import { CHANGE_SINGER_LIST, CHANGE_PAGE_COUNT, CHANGE_PULLDOWN_LOADING, CHANGE_PULLUP_LOADING, CHANGE_ENTER_LOADING } from './constants';
 import { fromJS } from 'immutable';
-import { CHANGE_ENTER_LOADING } from '../../Recommend/store/constants';
 import { getHotSingerListRequest, getSingerListRequest } from './../../../api/request';
 
 const changeSingerList = (data) => ({

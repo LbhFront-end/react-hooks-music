@@ -6,6 +6,7 @@ import { renderRoutes } from 'react-router-config';
 import store from './store';
 import routes from './routes';
 import { GlobalStyle } from './style';
+import { Data } from './application/Singers/data';
 
 function App() {
   return (
@@ -13,9 +14,11 @@ function App() {
       <HashRouter>
         <GlobalStyle />
         <IconStyle />
-        {
-          renderRoutes(routes)
-        }
+        <Data>
+          {
+            renderRoutes(routes)
+          }
+        </Data>
       </HashRouter>
     </Provider>
 

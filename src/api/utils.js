@@ -19,3 +19,22 @@ export const debounce = (func, delay) => {
     }, delay)
   }
 }
+
+export const filterIndex = rankList => {
+  for (let i = 0; i < rankList.length - 1; i++) {
+    if (rankList[i].tracks.length && !rankList[i + 1].tracks.length) {
+      return i + 1
+    }
+  }
+}
+
+export const getName = list => {
+  let str = '';
+  list.map((item, index) => {
+    str += index === 0 ? item.name : '/' + item.name;
+    return item;
+  })
+  return str;
+}
+
+export const isEmptyObject = obj => !obj || Object.keys (obj).length === 0;

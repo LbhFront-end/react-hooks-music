@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { renderRoutes } from 'react-router-config';
 import LazyLoad, { forceCheck } from 'react-lazyload';
 import Horizen from '../../baseUI/Horizen';
 import Scroll from '../../baseUI/Scroll';
@@ -16,11 +17,12 @@ import {
   refreshMoreHotSingerList
 } from './store/actionCreators';
 import { NavContainer, ListContainer, List, ListItem, EnterLoading } from './style';
+import { CategoryDataContext, CHANGE_CATEGORY, CHANGE_ALPHA } from './data';
 
 
 function Singers(props) {
-  let [category, setCategory] = useState('')
-  let [alpha, setAlpha] = useState('')
+  const { data, dispatch } = useContext(CategoryDataContext)
+  const { category, alpha } = data.toJS();
   const {
     singerList,
     pageCount,
@@ -29,16 +31,29 @@ function Singers(props) {
     pullDownLoading,
     pullUpRefreshDispatch,
     pullDownRefreshDispatch,
+    getHostSingerDispatch,
     enterLoading
   } = props;
   const singerListJS = singerList.toJS();
+  useEffect(() => {
+    if (!singerList.size) {
+      getHostSingerDispatch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   let handleUpdateAlpha = (val) => {
-    setAlpha(val)
+    dispatch({
+      type: CHANGE_ALPHA,
+      data: val
+    })
     updateDispatch(category, val)
   }
   let handleUpdateCategory = (val) => {
-    setCategory(val)
+    dispatch({
+      type: CHANGE_CATEGORY,
+      data: val
+    })
     updateDispatch(val, alpha)
   }
 
@@ -48,6 +63,11 @@ function Singers(props) {
   const handlePullDown = () => {
     pullDownRefreshDispatch(category, alpha)
   }
+
+  const enterDetail = (id) => {
+    props.history.push(`/singers/${id}`);
+  };
+
   return (
     <>
       <NavContainer>
@@ -65,12 +85,12 @@ function Singers(props) {
         />
       </NavContainer>
       <ListContainer>
-        {/* {
+        {
           enterLoading ?
             <EnterLoading>
               <Loading />
             </EnterLoading> : null
-        } */}
+        }
 
         <Scroll
           pullUp={handlePullUp}
@@ -82,7 +102,7 @@ function Singers(props) {
           <List>
             {
               singerListJS.map(item => (
-                <ListItem key={item.accountId}>
+                <ListItem key={item.id} onClick={() => enterDetail(item.id)}>
                   <div className="img_wrapper">
                     <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')} alt="music" />}>
                       <img src={`${item.picUrl}?param=300x300`} width="100%" height="100%" alt="music" />
@@ -95,6 +115,7 @@ function Singers(props) {
           </List>
         </Scroll>
       </ListContainer>
+      {renderRoutes(props.route.routes)}
     </>
   )
 }
