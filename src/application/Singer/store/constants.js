@@ -1,0 +1,3 @@
+export const CHANGE_ARTISI = 'singer/CHANGE_ARTIST';
+export const CHANGE_SONGS_OF_ARTISI = 'singer/CHANGE_SONGS_OF_ARTISI';
+export const CHANGE_ENTER_LOADING = 'singer/CHANGE_ENTER_LOADING';
