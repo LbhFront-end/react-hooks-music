@@ -20,13 +20,13 @@ export default (state = defaultState, action) => {
     case actionTypes.SET_FULL_SCREEN:
       return state.set('fullScreen', action.data)
     case actionTypes.SET_PLAYING_STATE:
-      return state.set('playingState', action.data)
+      return state.set('playing', action.data)
     case actionTypes.SET_SEQUECE_PLAYLIST:
       return state.set('sequecePlayList', action.data)
     case actionTypes.SET_PLAYLIST:
       return state.set('playList', action.data)
     case actionTypes.SET_PLAY_MODE:
-      return state.set('playMode', action.data)
+      return state.set('mode', action.data)
     case actionTypes.SET_CURRENT_INDEX:
       return state.set('currentIndex', action.data)
     case actionTypes.SET_SHOW_PLAYLIST:

@@ -46,11 +46,11 @@ let vendor = (() => {
     webkit: 'webkitTransform',
     Moz: 'MozTransform',
     O: 'OTransform',
-    ms: 'MSTransform',
+    ms: 'msTransform',
     standard: 'Transform'
   }
   for (let key in transformNames) {
-    if (elementStyle[transformNames[key] !== undefined]) {
+    if (elementStyle[transformNames[key]] !== undefined) {
       return key
     }
   }
@@ -66,3 +66,30 @@ export function prefixStyle(style) {
   }
   return vendor + style.charAt(0).toUpperCase() + style.substr(1);
 }
+
+export const getSongUrl = id => `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
+
+export const formatPlayTime = interval => {
+  interval = interval | 0;
+  const minute = (interval / 60) | 0;
+  const second = (interval % 60).toString().padStart(2, '0')
+  return `${minute}:${second}`
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+export function shuffle(arr) {
+  let newArr = [];
+  arr.forEach(item => newArr.push(item))
+  for (let i = 0; i < newArr.length; i++) {
+    let j = getRandomInt(0, i);
+    let t = newArr[i]
+    newArr[i] = newArr[j]
+    newArr[j] = t;
+  }
+  return newArr;
+}
+
+export const findIndex = (song, list) => list.findIndex(item => song.id === item.id)

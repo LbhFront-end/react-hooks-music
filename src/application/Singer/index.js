@@ -4,6 +4,7 @@ import { CSSTransition } from "react-transition-group";
 import Scroll from '../../baseUI/Scroll';
 import Header from '../../baseUI/Header';
 import Loading from "../../baseUI/Loading";
+import MusicNote from "../../baseUI/MusicNote";
 import SongsList from "../SongsList";
 import { HEADER_HEIGHT } from '../../api/config';
 import { getSingerInfo, changeEnterLoading } from "./store/actionCreators";
@@ -18,6 +19,7 @@ function Singer(props) {
   const songScroll = useRef();
   const header = useRef();
   const layer = useRef();
+  const musicNoteRef = useRef();
   // 图片初始高度
   const initialHeight = useRef(0);
   // 往上偏移的尺寸，露出圆角
@@ -25,17 +27,6 @@ function Singer(props) {
   const { artist: immutableArtist, songs: immutableSongs, loading, getSingerDataDispatch, match: { params: { id } } } = props;
   const artist = immutableArtist.toJS();
   const songs = immutableSongs.toJS();
-
-  useEffect(() => {
-    getSingerDataDispatch(id)
-    let h = imageWrapper.current.offsetHeight;
-    initialHeight.current = h;
-    songScrollWrapper.current.style.top = `${h - OFFSET}px`;
-    // 把遮罩先放在下面，以裹住歌曲列表
-    layer.current.style.top = `${h - OFFSET}px`;
-    songScroll.current.refresh();
-    //eslint-disable-next-line
-  }, []);
 
   const setShowStatusFalse = useCallback(() => {
     setShowStatus(false);
@@ -80,6 +71,21 @@ function Singer(props) {
     }
   };
 
+  const musicAnimation = (x, y) => {
+    musicNoteRef.current.startAnimation({ x, y })
+  }
+
+  useEffect(() => {
+    getSingerDataDispatch(id)
+    let h = imageWrapper.current.offsetHeight;
+    initialHeight.current = h;
+    songScrollWrapper.current.style.top = `${h - OFFSET}px`;
+    // 把遮罩先放在下面，以裹住歌曲列表
+    layer.current.style.top = `${h - OFFSET}px`;
+    songScroll.current.refresh();
+    //eslint-disable-next-line
+  }, []);
+
   return (
     <CSSTransition
       in={showStatus}
@@ -109,10 +115,12 @@ function Singer(props) {
               <SongsList
                 songs={songs}
                 showCollect={false}
+                musicAnimation={musicAnimation}
               // showBackground={false}
               />
             </Scroll>
           </SongListWrapper>
+          <MusicNote ref={musicNoteRef} />
         </Container>
         {loading ? (<Loading />) : null}
       </>
