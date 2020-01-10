@@ -18,7 +18,7 @@ function Album(props) {
   const [isMarquee, setIsMarquee] = useState(false);
   const headerEle = useRef();
   const musicNoteRef = useRef();
-  const { match: { params: { id } }, currentAlbum: currentAlbumImmutable, enterLoading, getAlbumDataDispatch } = props;
+  const { songsCount, match: { params: { id } }, currentAlbum: currentAlbumImmutable, enterLoading, getAlbumDataDispatch } = props;
   let currentAlbum = currentAlbumImmutable.toJS();
 
   useEffect(() => {
@@ -111,7 +111,7 @@ function Album(props) {
       unmountOnExit
       onExited={props.history.goBack}
     >
-      <Container>
+      <Container play={songsCount}>
         <Header
           ref={headerEle}
           title={title}
@@ -145,7 +145,8 @@ function Album(props) {
 
 const mapStateToProps = (state) => ({
   currentAlbum: state.getIn(['album', 'currentAlbum']),
-  enterLoading: state.getIn(['album', 'currentLoading'])
+  enterLoading: state.getIn(['album', 'currentLoading']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 
 const mapDispatchToProps = (dispatch) => {

@@ -24,7 +24,7 @@ function Singer(props) {
   const initialHeight = useRef(0);
   // 往上偏移的尺寸，露出圆角
   const OFFSET = 5;
-  const { artist: immutableArtist, songs: immutableSongs, loading, getSingerDataDispatch, match: { params: { id } } } = props;
+  const { songsCount, artist: immutableArtist, songs: immutableSongs, loading, getSingerDataDispatch, match: { params: { id } } } = props;
   const artist = immutableArtist.toJS();
   const songs = immutableSongs.toJS();
 
@@ -110,7 +110,7 @@ function Singer(props) {
             <span className="text">收藏</span>
           </CollectButton>
           <BgLayer ref={layer} />
-          <SongListWrapper ref={songScrollWrapper}>
+          <SongListWrapper ref={songScrollWrapper} play={songsCount}>
             <Scroll ref={songScroll} onScroll={handleScroll}>
               <SongsList
                 songs={songs}
@@ -131,7 +131,8 @@ function Singer(props) {
 const mapStateToProps = state => ({
   artist: state.getIn(['singerInfo', 'artist']),
   songs: state.getIn(['singerInfo', 'songsOfArtist']),
-  loading: state.getIn(['singerInfo', 'loading'])
+  loading: state.getIn(['singerInfo', 'loading']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 const mapDispatchToProps = dispatch => {
   return {

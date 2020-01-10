@@ -70,7 +70,7 @@ const MusicNote = forwardRef((props, ref) => {
         this.running = false;
         let icon = this.querySelector('div');
         icon.style[transform] = 'translate3d (0, 0, 0)'
-      })
+      }, false)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

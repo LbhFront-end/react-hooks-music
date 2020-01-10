@@ -1,6 +1,26 @@
 import { fromJS } from 'immutable';
 import * as actionTypes from './constants';
 import { playMode } from './../../../api/config';
+import { findIndex } from '../../../api/utils';
+
+
+const handleDeleteSong = (state, song) => {
+  const playList = JSON.parse(JSON.stringify(state.get('playList').toJS()))
+  const sequencePlayList = JSON.parse(JSON.stringify(state.get('sequencePlayList ').toJS()))
+  let currentIndex = state.get('currentIndex')
+  const fpIndex = findIndex(song, playList)
+  playList.splice(fpIndex, 1)
+  if (fpIndex < currentIndex) currentIndex--;
+
+  const fsIndex = findIndex(song, sequencePlayList)
+  sequencePlayList.splice(fsIndex, 1)
+
+  return state.merge({
+    'playList': fromJS(playList),
+    'sequencePlayList': fromJS(sequencePlayList),
+    'currentIndex': fromJS(currentIndex)
+  })
+}
 
 const defaultState = fromJS({
   fullScreen: false,
@@ -31,6 +51,8 @@ export default (state = defaultState, action) => {
       return state.set('currentIndex', action.data)
     case actionTypes.SET_SHOW_PLAYLIST:
       return state.set('showPlayList', action.data)
+    case actionTypes.DELETE_SONG:
+      return handleDeleteSong(state, action.data)
     default:
       return state;
   }

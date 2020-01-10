@@ -9,7 +9,7 @@ import { Container, List, ListItem, SongList, EnterLoading } from './style';
 
 
 function Rank(props) {
-  const { rankList: list, loading, getRankListDataDispatch } = props;
+  const { songsCount, rankList: list, loading, getRankListDataDispatch } = props;
   let rankList = list ? list.toJS() : [];
   useEffect(() => {
     getRankListDataDispatch()
@@ -59,7 +59,7 @@ function Rank(props) {
   }
 
   return (
-    <Container>
+    <Container play={songsCount}>
       <Scroll>
         <div>
           <h1 className="offical" style={displayStyle}> 官方榜 </h1>
@@ -76,7 +76,8 @@ function Rank(props) {
 
 const mapStateToProps = (state) => ({
   rankList: state.getIn(['rank', 'rankList']),
-  loading: state.getIn(['rank', 'loading'])
+  loading: state.getIn(['rank', 'loading']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 
 const mapDispatchToProps = (dispatch) => {

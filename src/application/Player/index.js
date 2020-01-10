@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'react-redux';
 import MiniPlayer from './MiniPlayer';
 import NormalPlayer from './NormalPlayer';
+import PlayList from './PlayList';
 import Toast from "../../baseUI/Toast";
 import {
   changePlayingState,
@@ -14,6 +15,8 @@ import {
 } from "./store/actionCreators";
 import { getSongUrl, isEmptyObject, findIndex, shuffle } from './../../api/utils';
 import { playMode } from './../../api/config';
+import { getLyricRequest } from '../../api/request';
+import Lyric from './../../api/lyric-parser';
 
 
 
@@ -22,14 +25,18 @@ function Player(props) {
   const [duration, setDuration] = useState(0);
   const [preSong, setPerSong] = useState({})
   const [modeText, setModeText] = useState('');
+  const [currentPlayingLyric, setPlayingLyric] = useState('');
   const audioRef = useRef();
   const toastRef = useRef();
+  const songReady = useRef();
+  const currentLyric = useRef();
+  const currentLineNum = useRef(0)
   let percent = isNaN(currentTime / duration) ? 0 : currentTime / duration
   const {
     fullScreen,
     playing,
     sequencePlayList: immutableSequencePlayList,
-    // playList: immutablePlayList,
+    playList: immutablePlayList,
     currentSong: immutableCurrentSong,
     mode,
     currentIndex,
@@ -43,26 +50,16 @@ function Player(props) {
     changeCurrentSongDispatch
   } = props;
 
-  // let currentSong = immutableCurrentSong.toJS();
-  // let playList = immutablePlayList.toJS();
+  let currentSong = immutableCurrentSong.toJS();
+  let playList = immutablePlayList.toJS();
   let sequencePlayList = immutableSequencePlayList.toJS();
-  const currentSong = {
-    al: { picUrl: "https://p1.music.126.net/JL_id1CFwNJpzgrXwemh4Q==/109951164172892390.jpg" },
-    name: "木偶人",
-    ar: [{ name: "薛之谦" }]
-  }
-  const playList = [
-    {
-      id: '1374051000',
-      al: { picUrl: "https://p1.music.126.net/JL_id1CFwNJpzgrXwemh4Q==/109951164172892390.jpg" },
-      name: "木偶人",
-      ar: [{ name: "薛之谦" }]
-    }
-  ]
 
   const clickPlaying = (e, state) => {
     e.stopPropagation();
     togglePlayingDispatch(state)
+    if (currentLyric.current) {
+      currentLyric.current.togglePlay(currentTime * 1000)
+    }
   }
 
   const updateTime = e => {
@@ -75,6 +72,9 @@ function Player(props) {
     audioRef.current.currentTime = newTime;
     if (!playing) {
       togglePlayingDispatch(true)
+    }
+    if (currentLyric.current) {
+      currentLyric.current.seek(newTime * 1000)
     }
   }
 
@@ -135,26 +135,63 @@ function Player(props) {
     }
   }
 
+  const handleError = () => {
+    songReady.current = true;
+    alert('播放出错')
+  }
+
+  const getLyric = id => {
+    let lyric = '';
+    if (currentLyric.current) {
+      currentLyric.current.stop();
+    }
+    getLyricRequest(id).then(data => {
+      lyric = data.lrc.lyric
+      if (!lyric) {
+        currentLyric.current = null
+        return;
+      }
+      currentLyric.current = new Lyric(lyric, handleLyric)
+      currentLyric.current.play();
+      currentLineNum.current = 0;
+      currentLyric.current.seek(0)
+    }).catch(() => {
+      songReady.current = true;
+      audioRef.current.play();
+    })
+  }
+
+  const handleLyric = ({ lineNum, txt }) => {
+    if (!currentLyric.current) return
+    currentLineNum.current = lineNum
+    setPlayingLyric(txt)
+  }
+
   useEffect(() => {
     if (
       !playList.length ||
       currentIndex === -1 ||
       !playList[currentIndex] ||
-      playList[currentIndex].id === preSong.id
+      playList[currentIndex].id === preSong.id ||
+      !songReady
     ) {
       return;
     }
 
     let current = playList[currentIndex];
-    changeCurrentSongDispatch(current);// 赋值 currentSong
     setPerSong(current)
+    songReady.current = false;
+    changeCurrentSongDispatch(current);// 赋值 currentSong
     audioRef.current.src = getSongUrl(current.id);
     setTimeout(() => {
-      audioRef.current.play()
+      audioRef.current.play().then(() => {
+        songReady.current = false;
+      })
     });
     togglePlayingDispatch(true);// 播放状态
+    getLyric(current.id);// 从头开始播放
     setCurrentTime(0);// 从头开始播放
-    setDuration((286000 / 1000) | 0);// 时长
+    setDuration((current.dt / 1000) | 0);// 时长
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playList, currentIndex]);
 
@@ -173,6 +210,7 @@ function Player(props) {
             fullScreen={fullScreen}
             clickPlaying={clickPlaying}
             setFullScreen={toggleFullScreenDispatch}
+            togglePlayList={togglePlayListDispatch}
           />
         )
       }
@@ -192,16 +230,21 @@ function Player(props) {
             handlePrev={handlePrev}
             handleNext={handleNext}
             changeMode={changeMode}
+            currentLyric={currentLyric.current}
+            currentPlayingLyric={currentPlayingLyric}
+            currentLineNum={currentLineNum.current}
+            togglePlayList={togglePlayListDispatch}
           />
         )
       }
 
-
       <audio
         onEnded={handleEnd}
+        onError={handleError}
         onTimeUpdate={updateTime}
         ref={audioRef}
       />
+      <PlayList />
       <Toast text={modeText} ref={toastRef} />
     </div>
   )

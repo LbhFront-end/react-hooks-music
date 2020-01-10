@@ -24,6 +24,7 @@ function Singers(props) {
   const { data, dispatch } = useContext(CategoryDataContext)
   const { category, alpha } = data.toJS();
   const {
+    songsCount,
     singerList,
     pageCount,
     updateDispatch,
@@ -84,7 +85,7 @@ function Singers(props) {
           oldVal={alpha}
         />
       </NavContainer>
-      <ListContainer>
+      <ListContainer play={songsCount}>
         {
           enterLoading ?
             <EnterLoading>
@@ -125,6 +126,7 @@ const mapStateToProps = (state) => ({
   pullUpLoading: state.getIn(['singers', 'pullUpLoading']),
   pullDownLoading: state.getIn(['singers', 'pullDownLoading']),
   pageCount: state.getIn(['singers', 'pageCount']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 
 const mapDispatchToProps = (dispatch) => {

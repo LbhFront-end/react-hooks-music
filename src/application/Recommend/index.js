@@ -10,8 +10,16 @@ import * as actionsType from './store/actionCreators'
 import { Content } from './style';
 
 function Recommend(props) {
-  const { bannerList, recommendList, enterLoading, getBannerDataDispatch, getRecommendListDateDispatch } = props;
+  const {
+    songsCount,
+    bannerList,
+    recommendList,
+    enterLoading,
+    getBannerDataDispatch,
+    getRecommendListDateDispatch
+  } = props;
   const scrollRef = useRef();
+
   useEffect(() => {
     if (!bannerList.size) {
       getBannerDataDispatch();
@@ -25,7 +33,7 @@ function Recommend(props) {
   const bannerListJS = bannerList ? bannerList.toJS() : []
   const recommendListJS = recommendList ? recommendList.toJS() : []
   return (
-    <Content>
+    <Content play={songsCount}>
       <Scroll className="list" ref={scrollRef} onScroll={forceCheck}>
         <div>
           <Slider bannerList={bannerListJS} />
@@ -33,7 +41,7 @@ function Recommend(props) {
         </div>
       </Scroll>
       {enterLoading ? <Loading /> : null}
-      { renderRoutes (props.route.routes) }
+      {renderRoutes(props.route.routes)}
     </Content>
   )
 }
@@ -42,6 +50,7 @@ const mapStateToProps = (state) => ({
   bannerList: state.getIn(['recommend', 'bannerList']),
   recommendList: state.getIn(['recommend', 'recommendList']),
   enterLoading: state.getIn(['recommend', 'enterLoading']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 const mapDispatchToProps = (dispatch) => {
   return {
