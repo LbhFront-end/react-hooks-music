@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import { getSongDetailRequest } from '../../../api/request';
 import {
   SET_CURRENT_SONG,
   SET_FULL_SCREEN,
@@ -50,3 +51,17 @@ export const deleteSong = (data) => ({
   type: DELETE_SONG,
   data
 });
+
+export const insertSong = (data) => ({
+  type: INSERT_SONG,
+  data
+});
+
+export const getSongDetail = (id) => {
+  return (dispatch) => {
+    getSongDetailRequest(id).then(data => {
+      let song = data.songs[0];
+      dispatch(insertSong(song));
+    })
+  }
+}
